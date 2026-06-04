@@ -56,7 +56,8 @@
       "expo-notifications",
       "expo-secure-store",
       "expo-image-picker",
-      "expo-font"
+      "expo-font",
+      "./withKoverVpnService"
     ],
     "experiments": {
       "typedRoutes": true
