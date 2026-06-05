@@ -4,7 +4,7 @@
 //   manual   → step-by-step DNS settings guide (iOS fallback / Android)
 //   success  → confirmation screen → route to home
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
   View, Text, StyleSheet, TouchableOpacity, Platform,
   ScrollView, Linking, Alert,
@@ -248,6 +248,17 @@ export default function ShieldSetup() {
   const isIOS     = Platform.OS === 'ios';
   const isAndroid = Platform.OS === 'android';
   const isWeb     = Platform.OS === 'web'; // Expo web / dev preview
+
+  // Auto-trigger activation 800ms after screen mounts so the user sees the
+  // shield intro for a moment before the system permission dialog appears.
+  // This removes the need to manually tap "I want Kover Shield".
+  const activatedRef = useRef(false);
+  useEffect(() => {
+    if (activatedRef.current) return;
+    activatedRef.current = true;
+    const timer = setTimeout(() => handleActivate(), 800);
+    return () => clearTimeout(timer);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleActivate = async () => {
     // Web/simulator: native modules unavailable → skip to manual guide
