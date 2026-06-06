@@ -249,11 +249,12 @@ export default function ShieldSetup() {
   const isAndroid = Platform.OS === 'android';
   const isWeb     = Platform.OS === 'web'; // Expo web / dev preview
 
-  // Auto-trigger activation 800ms after screen mounts so the user sees the
-  // shield intro for a moment before the system permission dialog appears.
-  // This removes the need to manually tap "I want Kover Shield".
+  // Auto-trigger activation 800ms after screen mounts (production only).
+  // Disabled in __DEV__ because the native VPN module requires a signed app
+  // build — it is not available in emulator/Expo Go dev sessions.
   const activatedRef = useRef(false);
   useEffect(() => {
+    if (__DEV__) return;            // ← skip auto-trigger in dev/emulator
     if (activatedRef.current) return;
     activatedRef.current = true;
     const timer = setTimeout(() => handleActivate(), 800);
@@ -525,6 +526,16 @@ export default function ShieldSetup() {
 
         {/* CTA area */}
         <View style={intro.actions}>
+          {/* DEV-only bypass — visible on emulator/Expo Go where VPN native
+              module is unavailable. Tap this to skip to the home screen. */}
+          {__DEV__ && (
+            <TouchableOpacity style={intro.devBypass} onPress={handleSkip}>
+              <Text style={intro.devBypassText}>
+                ⚡ Skip Shield — Dev Testing Only
+              </Text>
+            </TouchableOpacity>
+          )}
+
           <KButton
             variant="primary"
             full
@@ -601,6 +612,21 @@ const intro = StyleSheet.create({
   },
   actions: {
     gap: 12,
+  },
+  devBypass: {
+    backgroundColor: '#F59E0B22',
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: '#F59E0B88',
+    paddingVertical: 12,
+    alignItems: 'center',
+  },
+  devBypassText: {
+    fontFamily: Fonts.sansBold,
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#F59E0B',
+    letterSpacing: 0.3,
   },
 });
 
