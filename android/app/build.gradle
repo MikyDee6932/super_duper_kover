@@ -151,14 +151,8 @@ android {
         }
     }
 }
- 
-  param($match)
-  $match.Value -replace '(\n\}$)', "$insert`n}"
 
 
-// Kover Shield dependencies (manually appended)
-// These are loaded by the build system even when outside the main dependencies block
-// via the 'dependencies' DSL being additive in Gradle
 
 dependencies {
     // Kover Shield — DNS interception and blocklist sync
