@@ -8,21 +8,22 @@ import { View } from 'react-native';
 import { Colors } from '@/constants/colors';
 
 export default function AppLayout() {
-  const { user, profile, isInitialized } = useAuthStore();
+  const { user, profile, isInitialized, isLoading: isAuthLoading } = useAuthStore();
   const { isActive, isLoading, load } = useSubscriptionStore();
 
   useEffect(() => {
-    // Wait for auth to finish initializing before making redirect decisions.
-    // Without this guard, a brief null-user window after anonymous sign-in
-    // causes an immediate redirect to welcome before the session settles.
-    if (!isInitialized) return;
+    // Wait for auth to finish initializing (and any in-flight sign-in) before
+    // making redirect decisions. isLoading covers the anonymous sign-in window
+    // so we never redirect while a session is still being established.
+    if (!isInitialized || isAuthLoading) return;
 
     if (!user) {
+      if (__DEV__) return; // allow unauthenticated access in dev/emulator builds
       router.replace('/(auth)/welcome');
       return;
     }
     load(user.id);
-  }, [isInitialized, user?.id]);
+  }, [isInitialized, isAuthLoading, user?.id]);
 
   useEffect(() => {
     // Skip subscription gate in dev builds — allows testing without a real purchase

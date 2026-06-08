@@ -123,8 +123,7 @@ export async function getProfile(userId: string): Promise<Profile | null> {
 export async function updateProfile(userId: string, updates: Partial<Profile>) {
   const { error } = await supabase
     .from('profiles')
-    .update({ ...updates, updated_at: new Date().toISOString() })
-    .eq('id', userId);
+    .upsert({ id: userId, ...updates, updated_at: new Date().toISOString() });
   if (error) throw error;
 }
 
