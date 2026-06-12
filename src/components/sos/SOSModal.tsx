@@ -200,13 +200,15 @@ export function SOSModal({ visible, onClose }: SOSModalProps) {
     };
   }, [visible, phase]);
 
-  const handleClose = async () => {
+  // Close must be instant — the event log fires in the background so a slow
+  // or offline network can never make the ✕ feel dead in a vulnerable moment.
+  const handleClose = (target: '/(app)/home' | '/(app)/chat' = '/(app)/home') => {
     breathCancel.current = true;
     if (typewriterRef.current) clearTimeout(typewriterRef.current);
 
     if (user) {
       const duration = Math.round((Date.now() - startTime.current) / 1000);
-      await logSOSEvent(user.id, {
+      logSOSEvent(user.id, {
         emotional_state: profile?.last_mood ?? 'unknown',
         verse_shown: verse?.reference ?? undefined,
         action_taken: phase,
@@ -214,6 +216,7 @@ export function SOSModal({ visible, onClose }: SOSModalProps) {
       }).catch(() => {});
     }
     onClose();
+    router.replace(target);
   };
 
   const handleGoToBreath = () => {
@@ -228,9 +231,8 @@ export function SOSModal({ visible, onClose }: SOSModalProps) {
     );
   };
 
-  const handleCoachSloan = async () => {
-    await handleClose();
-    router.push('/(app)/chat');
+  const handleCoachSloan = () => {
+    handleClose('/(app)/chat');
   };
 
   const BREATHE_LABELS: Record<string, string> = {
@@ -249,7 +251,7 @@ export function SOSModal({ visible, onClose }: SOSModalProps) {
             <TouchableOpacity style={styles.backBtn} onPress={() => setPhase('main')}>
               <Text style={styles.backBtnText}>←  Back</Text>
             </TouchableOpacity>
-            <TouchableOpacity onPress={handleClose} style={styles.closeBtn}>
+            <TouchableOpacity onPress={() => handleClose()} style={styles.closeBtn}>
               <Text style={styles.closeText}>✕</Text>
             </TouchableOpacity>
           </View>
@@ -318,7 +320,7 @@ export function SOSModal({ visible, onClose }: SOSModalProps) {
             <View style={styles.badge}>
               <Text style={styles.badgeText}>SOS</Text>
             </View>
-            <TouchableOpacity onPress={handleClose} style={styles.closeBtn}>
+            <TouchableOpacity onPress={() => handleClose()} style={styles.closeBtn}>
               <Text style={styles.closeText}>✕</Text>
             </TouchableOpacity>
           </View>
@@ -511,21 +513,24 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
 
-  // ── Typewriter ──────────────────────────────────────────────────────────────
+  // ── Typewriter — display font, centered, ALL CAPS (design: SOS.jsx) ────────
   typewriterWrap: {
-    minHeight: 72,
+    minHeight: 96,
     justifyContent: 'flex-start',
+    alignItems: 'center',
   },
   typewriterText: {
-    fontFamily: Fonts.sansExtraBold,
-    fontSize: 17,
-    fontWeight: '800',
-    color: Colors.fg1,
-    letterSpacing: 0.8,
-    lineHeight: 26,
+    fontFamily: Fonts.display,
+    fontSize: 26,
+    fontWeight: '700',
+    color: Colors.cream50,
+    letterSpacing: 0.3,
+    lineHeight: 31,
+    textAlign: 'center',
+    textTransform: 'uppercase',
   },
   cursor: {
-    color: Colors.sosRed,
+    color: Colors.emerald300,
     fontWeight: '300',
   },
 
