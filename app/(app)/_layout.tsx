@@ -45,6 +45,7 @@ export default function AppLayout() {
         <Tabs.Screen name="profile" />
         <Tabs.Screen name="lesson" options={{ href: null }} />
         <Tabs.Screen name="journal" options={{ href: null }} />
+        <Tabs.Screen name="journal/today" options={{ href: null }} />
       </Tabs>
       <SOSButton />
     </View>

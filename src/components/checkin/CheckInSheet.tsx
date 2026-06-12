@@ -40,7 +40,7 @@ type Step = 'mood' | 'note' | 'verse';
 export function CheckInSheet({ visible, onClose, onComplete }: CheckInSheetProps) {
   const insets = useSafeAreaInsets();
   const { user } = useAuthStore();
-  const { markCheckInComplete } = useStreakStore();
+  const { markCheckInComplete, markCheckInCompleteLocal } = useStreakStore();
 
   const [step, setStep] = useState<Step>('mood');
   const [selectedMood, setSelectedMood] = useState<typeof FEELINGS[0] | null>(null);
@@ -68,15 +68,22 @@ export function CheckInSheet({ visible, onClose, onComplete }: CheckInSheetProps
   };
 
   const handleComplete = async () => {
-    if (!user || !selectedMood) return;
+    if (!selectedMood) return;
     setSaving(true);
     try {
-      await saveCheckIn(user.id, {
-        feeling: selectedMood.label,
-        note: note.trim() || undefined,
-        verse_shown: verse?.reference ?? undefined,
-      });
-      await markCheckInComplete(user.id);
+      if (user) {
+        // Authenticated: persist check-in data to Supabase
+        await saveCheckIn(user.id, {
+          feeling: selectedMood.label,
+          note: note.trim() || undefined,
+          verse_shown: verse?.reference ?? undefined,
+        });
+        await markCheckInComplete(user.id);
+      } else {
+        // Dev / null-user: update streak store locally so the home screen
+        // reflects the completed check-in without a Supabase call.
+        markCheckInCompleteLocal();
+      }
       reset();
       onComplete?.();
       onClose();

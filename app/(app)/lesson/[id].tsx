@@ -31,7 +31,7 @@ export default function LessonScreen() {
   const insets = useSafeAreaInsets();
 
   const { user, profile, refreshProfile } = useAuthStore();
-  const { updateLessonProgress, markLessonComplete, currentStreak } = useStreakStore();
+  const { updateLessonProgress, markLessonComplete, markLessonCompleteLocal, currentStreak } = useStreakStore();
 
   const [lesson, setLesson] = useState<DailyLesson | null>(null);
   const [verseText, setVerseText] = useState('');
@@ -123,13 +123,15 @@ export default function LessonScreen() {
 
   const handleComplete = async () => {
     if (user) {
-      // Mark lesson complete in streaks table
+      // Authenticated: persist to Supabase
       await markLessonComplete(user.id).catch(() => {});
-
-      // Advance current_lesson_day so tomorrow's home card shows the next day
       const nextDay = lessonId + 1;
       await updateProfile(user.id, { current_lesson_day: nextDay }).catch(() => {});
       await refreshProfile().catch(() => {});
+    } else {
+      // Dev / null-user: update store locally so the EarnedSheet and home
+      // screen show the correct Day 1 streak instead of 0.
+      markLessonCompleteLocal();
     }
     setEarnedVisible(true);
   };
