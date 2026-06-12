@@ -103,14 +103,24 @@ export default function Paywall() {
         let uid = user?.id ?? null;
         if (!uid) {
           const { data } = await supabase.auth.signInAnonymously();
+          // Immediately push the session into the auth store so the layout
+          // guard sees a non-null user before we navigate away from paywall.
+          if (data.session) {
+            const { useAuthStore: as } = await import('@/store/authStore');
+            as.getState().setSession(data.session);
+          }
           uid = data.user?.id ?? null;
         }
-        if (uid && Object.keys(answers).length > 0) {
+        if (uid) {
+          // Always write onboarding_completed so index.tsx doesn't loop the user
+          // back to the quiz. Include quiz answers only when they exist.
           await updateProfile(uid, {
-            ...answers,
-            days_since_clean: answers.days_since_clean != null
-              ? parseInt(String(answers.days_since_clean), 10) || 0
-              : undefined,
+            ...(Object.keys(answers).length > 0 ? {
+              ...answers,
+              days_since_clean: answers.days_since_clean != null
+                ? parseInt(String(answers.days_since_clean), 10) || 0
+                : undefined,
+            } : {}),
             onboarding_completed: true,
           });
           resetOnboarding();

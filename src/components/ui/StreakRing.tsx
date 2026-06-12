@@ -11,17 +11,19 @@ interface StreakRingProps {
   size?: number;
   strokeWidth?: number;
   showLabel?: boolean;
+  /** When true the ring fills completely — used to celebrate today's completion. */
+  completed?: boolean;
 }
 
-export function StreakRing({ streak, size = 120, strokeWidth = 8, showLabel = true }: StreakRingProps) {
+export function StreakRing({ streak, size = 120, strokeWidth = 8, showLabel = true, completed = false }: StreakRingProps) {
   const radius = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
   const cx = size / 2;
   const cy = size / 2;
 
-  // Progress wraps at milestones: 7, 14, 30, 60, 90
+  // Full ring when lesson is done today; otherwise wrap at milestones 7 / 14 / 30 / 60 / 90.
   const milestone = streak < 7 ? 7 : streak < 14 ? 14 : streak < 30 ? 30 : streak < 60 ? 60 : 90;
-  const progress = Math.min((streak % milestone) / milestone, 1);
+  const progress = completed ? 1 : Math.min((streak % milestone) / milestone, 1);
 
   const animatedProgress = useSharedValue(0);
 

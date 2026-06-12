@@ -139,8 +139,8 @@ function TodayCard({ dayNum, streak, lessonCompleted, onPress }: {
         colors={[Colors.bgSurface2, Colors.bgSurface]}
         style={tdc.gradient}
       >
-        {/* Streak ring */}
-        <StreakRing streak={streak} size={150} strokeWidth={10} />
+        {/* Streak ring — fills completely when today's lesson is done */}
+        <StreakRing streak={streak} size={150} strokeWidth={10} completed={lessonCompleted} />
 
         {/* Lesson CTA */}
         <View style={tdc.cta}>
@@ -407,7 +407,7 @@ export default function Home() {
 
           <TouchableOpacity
             style={[styles.journalCard, todayStreak?.journal_completed && styles.journalCardDone]}
-            onPress={() => router.push('/(app)/journal')}
+            onPress={() => router.push('/(app)/journal/today')}
             activeOpacity={0.8}
           >
             {/* Coach Sloan chip */}

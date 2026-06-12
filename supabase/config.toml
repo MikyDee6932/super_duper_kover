@@ -1,0 +1,10 @@
+# Edge Function deploy settings.
+# The chat function validates the user JWT itself (supabase.auth.getUser) —
+# platform-level verify_jwt must stay off because this project uses
+# asymmetric JWT signing keys, which the gateway check rejects
+# (UNAUTHORIZED_ASYMMETRIC_JWT).
+[functions.chat]
+verify_jwt = false
+
+[functions.journal-reflect]
+verify_jwt = false

@@ -38,7 +38,7 @@ class KoverDNSModule(private val reactContext: ReactApplicationContext) :
     @ReactMethod
     fun startVpnService(nextDNSProfileId: String, promise: Promise) {
         try {
-            val activity = currentActivity
+            val activity = reactContext.currentActivity
             if (activity == null) {
                 promise.reject("NO_ACTIVITY", "No foreground activity — cannot show VPN dialog")
                 return
@@ -92,7 +92,7 @@ class KoverDNSModule(private val reactContext: ReactApplicationContext) :
         }
     }
 
-    override fun onNewIntent(intent: Intent?) { /* no-op */ }
+    override fun onNewIntent(intent: Intent) { /* no-op */ }
 
     @ReactMethod
     fun stopVpnService(promise: Promise) {

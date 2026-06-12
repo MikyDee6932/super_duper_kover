@@ -52,8 +52,11 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
     supabase.auth.onAuthStateChange(async (_event, session) => {
       if (session) {
+        // Set user immediately so layout guards don't see a null-user window
+        // while the profile fetch is in flight.
+        set({ session, user: session.user });
         const profile = await getProfile(session.user.id);
-        set({ session, user: session.user, profile });
+        set({ profile });
       } else {
         set({ session: null, user: null, profile: null });
       }
